@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال بيانات - Sportify Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0a0f1e; font-family: 'Segoe UI', sans-serif; }
+        .form-container, .result-box, .chart-container { background: #1e293b; border-radius: 25px; padding: 25px; margin-top: 25px; color: white; }
+        .btn-submit { background-color: #00d4ff; color: #0a0f1e; border-radius: 30px; padding: 12px; font-weight: bold; width: 100%; margin-top: 20px; }
+        .btn-logout { background-color: #dc3545; color: white; border-radius: 30px; padding: 5px 15px; margin-left: 10px; text-decoration: none; }
+        .navbar-brand { color: #00d4ff !important; font-weight: bold; }
+        .nav-link { color: white !important; }
+        #historyList { max-height: 200px; overflow-y: auto; }
+        .history-item { background: #0f172a; padding: 8px; margin: 5px 0; border-radius: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg bg-dark p-3">
+    <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Sportify Pro</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">الرئيسية</a></li>
+                <li class="nav-item"><a class="nav-link active" href="input-data.html">إدخال بيانات</a></li>
+                <li class="nav-item"><span id="userEmailDisplay" class="text-white me-2"></span></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> خروج</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-7">
+            <div class="form-container">
+                <h4><i class="fas fa-edit"></i> سجل أداء اليوم</h4>
+                <form id="performanceForm">
+                    <label class="form-label mt-2">السرعة القصوى (م/ث)</label>
+                    <input type="number" step="0.1" class="form-control bg-dark text-white" id="speed" required>
+                    <label class="form-label mt-2">المسافة المقطوعة (كم)</label>
+                    <input type="number" step="0.1" class="form-control bg-dark text-white" id="distance" required>
+                    <label class="form-label mt-2">دقة التمرير (%)</label>
+                    <input type="number" class="form-control bg-dark text-white" id="accuracy" required>
+                    <label class="form-label mt-2">نسبة اللياقة (%)</label>
+                    <input type="number" class="form-control bg-dark text-white" id="fitness" required>
+                    <label class="form-label mt-2">عدد الأهداف</label>
+                    <input type="number" class="form-control bg-dark text-white" id="goals" value="0">
+                    <button type="submit" class="btn-submit"><i class="fas fa-chart-line"></i> حفظ وتحليل</button>
+                </form>
+            </div>
+
+            <div id="results" style="display:none;">
+                <div class="result-box">
+                    <h5><i class="fas fa-robot" style="color:#00d4ff;"></i> تقرير ذكي</h5>
+                    <div id="analysisText"></div>
+                    <div id="planText" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="chart-container">
+                <h5><i class="fas fa-chart-line"></i> تطور دقة التمرير</h5>
+                <canvas id="accuracyChart" width="400" height="250"></canvas>
+                <hr>
+                <h6>آخر 5 محاولات</h6>
+                <div id="historyList"></div>
+                <button id="clearHistoryBtn" class="btn btn-danger btn-sm mt-2">مسح كل البيانات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تسجيل الدخول: لازم يكون فيه بريد وكلمة سر في localStorage
+    let currentUser = localStorage.getItem("loggedInUser");
+    if (!currentUser) {
+        // لو مش مسجل دخول، نطلبه يسجل
+        let email = prompt("تسجيل الدخول مطلوب\nأدخل بريدك الإلكتروني:");
+        let password = prompt("أدخل كلمة السر (أي حروف، لكن للعرض فقط)");
+        if (email && password) {
+            localStorage.setItem("loggedInUser", email);
+            currentUser = email;
+        } else {
+            window.location.href = "index.html";
+        }
+    }
+    document.getElementById("userEmailDisplay").innerHTML = `👤 ${currentUser}`;
+
+    // دالة حفظ البيانات في localStorage لكل مستخدم
+    function saveUserData(speed, distance, accuracy, fitness, goals) {
+        let key = `history_${currentUser}`;
+        let history = JSON.parse(localStorage.getItem(key)) || [];
+        let newRecord = {
+            date: new Date().toLocaleString(),
+            speed, distance, accuracy, fitness, goals
+        };
+        history.push(newRecord);
+        if (history.length > 10) history.shift(); // نحتفظ بآخر 10 بس
+        localStorage.setItem(key, JSON.stringify(history));
+        return history;
+    }
+
+    // تحميل وعرض التاريخ
+    function loadHistory() {
+        let key = `history_${currentUser}`;
+        let history = JSON.parse(localStorage.getItem(key)) || [];
+        let historyDiv = document.getElementById("historyList");
+        if (history.length === 0) {
+            historyDiv.innerHTML = "<p class='text-secondary'>لا توجد بيانات مسجلة بعد</p>";
+        } else {
+            let html = "";
+            for (let i = history.length-1; i >= Math.max(0, history.length-5); i--) {
+                let rec = history[i];
+                html += `<div class='history-item'>${rec.date} | سرعة:${rec.speed} | تمرير:${rec.accuracy}% | لياقة:${rec.fitness}%</div>`;
+            }
+            historyDiv.innerHTML = html;
+        }
+        return history;
+    }
+
+    // رسم بياني لآخر 5 قياسات دقة تمرير
+    function updateChart(history) {
+        let last5 = history.slice(-5);
+        let labels = last5.map((_, idx) => `#${idx+1}`);
+        let accuracies = last5.map(r => r.accuracy);
+        let ctx = document.getElementById('accuracyChart').getContext('2d');
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: [{ label: 'دقة التمرير %', data: accuracies, borderColor: '#00d4ff', tension: 0.2 }] },
+            options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+        });
+    }
+
+    // تحليل ذكي (نفس السابق مع تطوير بسيط)
+    function analyzeAndPlan(speed, accuracy, fitness, goals) {
+        let speedAdvice = speed >= 11 ? "🔥 ممتاز! سرعتك تنافس المحترفين." : (speed >= 8 ? "✅ جيد. أضف تمارين عدو 30م × 8 أسبوعيًا." : "⚠️ سرعتك منخفضة. ابدأ تمارين تسارع.");
+        let accuracyAdvice = accuracy >= 80 ? "🎯 دقة ممتازة!" : (accuracy >= 60 ? "📈 جيد، تمرن على التمرير بالقدم الضعيفة." : "❗ تحتاج تحسين دقة التمرير.");
+        let fitnessAdvice = fitness >= 85 ? "💪 لياقة عالية!" : (fitness >= 70 ? "⚡ جيد، أضف HIIT 15 دقيقة." : "😰 لياقة منخفضة، ابدأ مشي وجري.");
+        let goalsComment = goals > 0 ? `🎉 سجلت ${goals} هدف!` : "";
+        let trainingPlan = (speed < 8 || fitness < 70) ? "📅 الاثنين: عدو، الأربعاء: جري، السبت: سرعة." : (accuracy < 65 ? "📅 ركز على تمريرات قصيرة وطويلة." : "📅 حافظ على مستواك بحصة سرعة وتمرير ومباراة.");
+        
+        document.getElementById('analysisText').innerHTML = `
+            <p>🚀 السرعة: ${speed} م/ث → ${speedAdvice}</p>
+            <p>🎯 التمرير: ${accuracy}% → ${accuracyAdvice}</p>
+            <p>💓 اللياقة: ${fitness}% → ${fitnessAdvice}</p>
+            ${goalsComment ? `<p>${goalsComment}</p>` : ""}
+        `;
+        document.getElementById('planText').innerHTML = `<strong>📋 الخطة:</strong> ${trainingPlan}`;
+        document.getElementById('results').style.display = "block";
+    }
+
+    // عند إرسال النموذج: حفظ وتحليل وتحديث
+    document.getElementById('performanceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let speed = parseFloat(document.getElementById('speed').value);
+        let distance = parseFloat(document.getElementById('distance').value);
+        let accuracy = parseFloat(document.getElementById('accuracy').value);
+        let fitness = parseFloat(document.getElementById('fitness').value);
+        let goals = parseInt(document.getElementById('goals').value) || 0;
+
+        let history = saveUserData(speed, distance, accuracy, fitness, goals);
+        analyzeAndPlan(speed, accuracy, fitness, goals);
+        loadHistory();
+        updateChart(history);
+        
+        // مسح الحقول بعد الحفظ
+        document.getElementById('performanceForm').reset();
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // تسجيل الخروج
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem("loggedInUser");
+        location.reload();
+    });
+
+    // حذف كل بيانات المستخدم
+    document.getElementById('clearHistoryBtn').addEventListener('click', function() {
+        if (confirm("هل أنت متأكد من مسح كل بيانات أدائك؟")) {
+            localStorage.removeItem(`history_${currentUser}`);
+            loadHistory();
+            updateChart([]);
+            document.getElementById('results').style.display = "none";
+            alert("تم مسح البيانات بنجاح");
+        }
+    });
+
+    // عند تحميل الصفحة: عرض التاريخ والرسم البياني
+    let initialHistory = loadHistory();
+    if (initialHistory.length > 0) updateChart(initialHistory);
+</script>
+</body>
+</html>

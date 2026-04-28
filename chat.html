@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دردشة المدربين واللاعبين - Sportify Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chat-container {
+            background: #1e293b;
+            border-radius: 20px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.sent {
+            align-items: flex-end;
+        }
+        .message.received {
+            align-items: flex-start;
+        }
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 5px 0;
+        }
+        .message.sent .message-bubble {
+            background: #00d4ff;
+            color: #0a0f1e;
+        }
+        .message.received .message-bubble {
+            background: #0f172a;
+            color: white;
+        }
+        .message-time {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .chat-input-area {
+            padding: 15px;
+            background: #0f172a;
+            border-top: 1px solid #2d3a4e;
+        }
+        .online-users {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 15px;
+            height: 500px;
+            overflow-y: auto;
+        }
+        .user-item {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .user-item:hover, .user-item.active {
+            background: #00d4ff20;
+            border-right: 3px solid #00d4ff;
+        }
+        .user-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-online { background: #00ff88; }
+        .status-offline { background: #888; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
+    <div class="container">
+        <a class="navbar-brand text-cyan" href="index.html"><i class="fas fa-futbol"></i> Sportify Pro</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link text-white" href="index.html">الرئيسية</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="input-data.html">بيانات</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="video-analysis.html">تحليل فيديو</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="academy-dashboard.html">الأكاديميات</a></li>
+                <li class="nav-item"><a class="nav-link text-white active" href="chat.html">دردشة</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="store.html">متجر</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="online-users">
+                <h5><i class="fas fa-users text-cyan"></i> المتواجدون الآن</h5>
+                <hr>
+                <div id="usersList"></div>
+                <hr>
+                <div class="mt-3">
+                    <h6><i class="fas fa-user-plus"></i> إضافة مستخدم جديد</h6>
+                    <input type="text" id="newUserName" class="form-control bg-dark text-white mb-2" placeholder="اسم المستخدم">
+                    <select id="newUserRole" class="form-control bg-dark text-white mb-2">
+                        <option value="player">لاعب</option>
+                        <option value="coach">مدرب</option>
+                    </select>
+                    <button onclick="addNewUser()" class="btn-primary-custom w-100">إضافة</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="chat-container">
+                <div class="messages-area" id="messagesArea">
+                    <div class="text-center text-secondary">اختر مستخدمًا لبدء المحادثة</div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control bg-dark text-white" placeholder="اكتب رسالتك..." disabled>
+                        <button onclick="sendMessage()" class="btn-primary-custom" id="sendBtn" disabled><i class="fas fa-paper-plane"></i> إرسال</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    let currentUser = localStorage.getItem("loggedInUser") || "زائر";
+    let currentRole = localStorage.getItem("userRole") || "player";
+    let activeChatWith = null;
+    
+    // تحميل المستخدمين
+    function loadUsers() {
+        let users = JSON.parse(localStorage.getItem("chat_users")) || [];
+        
+        // التأكد من وجود المستخدم الحالي
+        if (!users.find(u => u.name === currentUser)) {
+            users.push({ name: currentUser, role: currentRole, status: "online", lastSeen: new Date() });
+            localStorage.setItem("chat_users", JSON.stringify(users));
+        }
+        
+        let usersList = document.getElementById('usersList');
+        let filtered = users.filter(u => u.name !== currentUser);
+        
+        if (filtered.length === 0) {
+            usersList.innerHTML = '<div class="text-secondary">لا يوجد مستخدمون آخرون</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let u of filtered) {
+            html += `
+                <div class="user-item ${activeChatWith === u.name ? 'active' : ''}" onclick="startChat('${u.name}')">
+                    <span class="user-status ${u.status === 'online' ? 'status-online' : 'status-offline'}"></span>
+                    <strong>${u.name}</strong>
+                    <small class="text-secondary"> (${u.role === 'coach' ? 'مدرب' : 'لاعب'})</small>
+                    <div class="small text-secondary">${u.status === 'online' ? 'متصل' : 'غير متصل'}</div>
+                </div>
+            `;
+        }
+        usersList.innerHTML = html;
+    }
+    
+    // بدء محادثة
+    function startChat(userName) {
+        activeChatWith = userName;
+        loadMessages();
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        
+        // تحديث الواجهة
+        document.querySelectorAll('.user-item').forEach(el => {
+            el.classList.remove('active');
+            if (el.innerText.includes(userName)) el.classList.add('active');
+        });
+    }
+    
+    // تحميل الرسائل
+    function loadMessages() {
+        if (!activeChatWith) return;
+        
+        let conversations = JSON.parse(localStorage.getItem("chat_conversations")) || {};
+        let key = [currentUser, activeChatWith].sort().join('_');
+        let messages = conversations[key] || [];
+        
+        let area = document.getElementById('messagesArea');
+        if (messages.length === 0) {
+            area.innerHTML = '<div class="text-center text-secondary">لا توجد رسائل بعد. ابدأ المحادثة!</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let msg of messages) {
+            let isSent = msg.sender === currentUser;
+            html += `
+                <div class="message ${isSent ? 'sent' : 'received'}">
+                    <div class="message-bubble">
+                        <strong>${msg.sender}</strong><br>
+                        ${msg.text}
+                    </div>
+                    <div class="message-time">${msg.time}</div>
+                </div>
+            `;
+        }
+        area.innerHTML = html;
+        area.scrollTop = area.scrollHeight;
+    }
+    
+    // إرسال رسالة
+    function sendMessage() {
+        let text = document.getElementById('messageInput').value.trim();
+        if (!text || !activeChatWith) return;
+        
+        let conversations = JSON.parse(localStorage.getItem("chat_conversations")) || {};
+        let key = [currentUser, activeChatWith].sort().join('_');
+        let messages = conversations[key] || [];
+        
+        messages.push({
+            sender: currentUser,
+            receiver: activeChatWith,
+            text: text,
+            time: new Date().toLocaleTimeString()
+        });
+        
+        conversations[key] = messages;
+        localStorage.setItem("chat_conversations", JSON.stringify(conversations));
+        
+        document.getElementById('messageInput').value = '';
+        loadMessages();
+    }
+    
+    // إضافة مستخدم جديد
+    function addNewUser() {
+        let name = document.getElementById('newUserName').value.trim();
+        let role = document.getElementById('newUserRole').value;
+        
+        if (!name) {
+            alert("الرجاء إدخال اسم المستخدم");
+            return;
+        }
+        
+        let users = JSON.parse(localStorage.getItem("chat_users")) || [];
+        if (users.find(u => u.name === name)) {
+            alert("هذا المستخدم موجود بالفعل");
+            return;
+        }
+        
+        users.push({ name: name, role: role, status: "online", lastSeen: new Date() });
+        localStorage.setItem("chat_users", JSON.stringify(users));
+        
+        document.getElementById('newUserName').value = '';
+        loadUsers();
+        alert(`تم إضافة ${name} بنجاح!`);
+    }
+    
+    // تحديث الحالة كل دقيقة
+    function updateStatus() {
+        let users = JSON.parse(localStorage.getItem("chat_users")) || [];
+        let user = users.find(u => u.name === currentUser);
+        if (user) {
+            user.status = "online";
+            user.lastSeen = new Date();
+            localStorage.setItem("chat_users", JSON.stringify(users));
+        }
+        loadUsers();
+    }
+    
+    setInterval(updateStatus, 30000);
+    loadUsers();
+    
+    // السماح بالإرسال بالضغط على Enter
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+</body>
+</html>
