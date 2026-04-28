@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - Scout Zone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
+    <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Scout Zone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="transfers.html">Transfers</a></li>
+                <li class="nav-item"><a class="nav-link" href="academy-dashboard.html">Academy</a></li>
+                <li class="nav-item"><a class="nav-link" href="competitions.html">Competitions</a></li>
+                <li class="nav-item"><a class="nav-link active" href="statistics.html">Statistics</a></li>
+                <li class="nav-item"><a class="nav-link" href="video-analysis.html">Analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="store.html">Store</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="btn btn-custom ms-2" href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="hero-section text-center">
+        <h1 class="display-4 fw-bold">Advanced <span class="text-gradient">Statistics</span></h1>
+        <p class="lead text-secondary">Deep dive into player performance analytics</p>
+    </div>
+
+    <!-- Stats Overview Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-users fa-2x text-cyan"></i>
+                <h3 class="mt-2">12,847</h3>
+                <p class="text-secondary">Active Players</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-chart-line fa-2x text-cyan"></i>
+                <h3 class="mt-2">8.7</h3>
+                <p class="text-secondary">Avg Speed (m/s)</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-bullseye fa-2x text-cyan"></i>
+                <h3 class="mt-2">71%</h3>
+                <p class="text-secondary">Avg Accuracy</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-trophy fa-2x text-cyan"></i>
+                <h3 class="mt-2">156</h3>
+                <p class="text-secondary">Academies</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card-dark">
+                <h5><i class="fas fa-chart-line text-cyan"></i> Performance Trends</h5>
+                <canvas id="trendChart" height="200"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-dark">
+                <h5><i class="fas fa-chart-pie text-cyan"></i> Position Distribution</h5>
+                <canvas id="positionChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Rankings -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card-dark">
+                <h5><i class="fas fa-bolt text-warning"></i> Top Speed (m/s)</h5>
+                <div id="topSpeedList"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-dark">
+                <h5><i class="fas fa-chart-line text-info"></i> Best Accuracy (%)</h5>
+                <div id="topAccuracyList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-secondary py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2026 Scout Zone. All rights reserved. | <a href="terms.html" class="text-cyan">Terms</a> | <a href="privacy.html" class="text-cyan">Privacy</a> | <a href="contact.html" class="text-cyan">Contact</a></p>
+    </div>
+</footer>
+
+<script>
+    // Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+            datasets: [
+                { label: 'Avg Speed', data: [8.1, 8.3, 8.5, 8.6, 8.8, 9.0], borderColor: '#00d4ff', tension: 0.3 },
+                { label: 'Pass Accuracy', data: [65, 67, 69, 70, 72, 74], borderColor: '#ffaa00', tension: 0.3 }
+            ]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+    });
+
+    // Position Chart
+    const positionCtx = document.getElementById('positionChart').getContext('2d');
+    new Chart(positionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Forward', 'Midfielder', 'Defender', 'Goalkeeper'],
+            datasets: [{ data: [28, 35, 27, 10], backgroundColor: ['#00d4ff', '#ffaa00', '#10b981', '#ef4444'] }]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
+    });
+
+    // Top Speed Rankings
+    const topSpeed = [
+        { name: "Kylian Mbappé", speed: 10.8 }, { name: "Erling Haaland", speed: 10.5 }, { name: "Vinicius Jr", speed: 10.3 }, { name: "Achraf Hakimi", speed: 10.1 }, { name: "Marcus Rashford", speed: 9.9 }
+    ];
+    let speedHtml = '<div class="list-group">';
+    topSpeed.forEach((p, i) => { speedHtml += `<div class="list-group-item bg-dark text-white">${i+1}. ${p.name} <span class="float-end text-cyan">${p.speed} m/s</span></div>`; });
+    speedHtml += '</div>';
+    document.getElementById('topSpeedList').innerHTML = speedHtml;
+
+    // Top Accuracy
+    const topAccuracy = [
+        { name: "Kevin De Bruyne", acc: 89 }, { name: "Toni Kroos", acc: 88 }, { name: "Rodri", acc: 87 }, { name: "Bernardo Silva", acc: 86 }, { name: "Luka Modrić", acc: 85 }
+    ];
+    let accHtml = '<div class="list-group">';
+    topAccuracy.forEach((p, i) => { accHtml += `<div class="list-group-item bg-dark text-white">${i+1}. ${p.name} <span class="float-end text-cyan">${p.acc}%</span></div>`; });
+    accHtml += '</div>';
+    document.getElementById('topAccuracyList').innerHTML = accHtml;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

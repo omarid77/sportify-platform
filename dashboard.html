@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Scout Zone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Include notification bell HTML here (as above) -->
+
+<nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
+    <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Scout Zone</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="dashboard.html">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="input-data.html">Input Data</a></li>
+                <li class="nav-item"><a class="nav-link" href="video-analysis.html">Analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="nav-link" href="store.html">Store</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="hero-section">
+        <h1>Welcome back, <span id="userName" class="text-gradient">Player</span>!</h1>
+        <p>Your performance summary and what's new</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-chart-line fa-2x text-cyan"></i>
+                <h3 id="avgSpeed">-</h3>
+                <p>Avg Speed (m/s)</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-bullseye fa-2x text-cyan"></i>
+                <h3 id="avgAccuracy">-</h3>
+                <p>Avg Accuracy</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-heartbeat fa-2x text-cyan"></i>
+                <h3 id="avgFitness">-</h3>
+                <p>Avg Fitness</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-stats p-3 text-center">
+                <i class="fas fa-video fa-2x text-cyan"></i>
+                <h3 id="videoCount">0</h3>
+                <p>Videos Analyzed</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-md-7">
+            <div class="card-dark">
+                <h5><i class="fas fa-history text-cyan"></i> Recent Activity</h5>
+                <div id="recentActivity"></div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card-dark">
+                <h5><i class="fas fa-dumbbell text-cyan"></i> Current Training Plan</h5>
+                <div id="currentPlan"></div>
+            </div>
+            <div class="card-dark mt-3">
+                <h5><i class="fas fa-robot text-cyan"></i> AI Smart Tip</h5>
+                <div id="smartTip" class="p-3 bg-dark rounded"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) window.location.href = 'login.html';
+        else {
+            document.getElementById('userName').innerHTML = user.email.split('@')[0];
+            await loadDashboardData(user.uid);
+        }
+    });
+
+    async function loadDashboardData(userId) {
+        // Load performances
+        const performances = await getPerformances(userId, 5);
+        if (performances.length > 0) {
+            const avgSpeed = (performances.reduce((s, p) => s + (p.speed || 0), 0) / performances.length).toFixed(1);
+            const avgAccuracy = Math.round(performances.reduce((s, p) => s + (p.accuracy || 0), 0) / performances.length);
+            const avgFitness = Math.round(performances.reduce((s, p) => s + (p.fitness || 0), 0) / performances.length);
+            document.getElementById('avgSpeed').innerHTML = avgSpeed;
+            document.getElementById('avgAccuracy').innerHTML = avgAccuracy + '%';
+            document.getElementById('avgFitness').innerHTML = avgFitness + '%';
+            
+            // AI Smart Tip
+            let tip = '';
+            if (avgSpeed < 8.5) tip = 'Focus on sprint drills twice a week to improve your speed.';
+            else if (avgAccuracy < 70) tip = 'Your passing accuracy needs work. Try 100 one-touch passes daily.';
+            else if (avgFitness < 75) tip = 'Add 15-min HIIT sessions to boost your stamina.';
+            else tip = 'You\'re doing great! Maintain consistency with your training.';
+            document.getElementById('smartTip').innerHTML = tip;
+        }
+        
+        // Load video analyses
+        const videosSnapshot = await db.collection('users').doc(userId).collection('videoAnalyses').get();
+        document.getElementById('videoCount').innerHTML = videosSnapshot.size;
+        
+        // Recent activity
+        let activityHtml = '<div class="list-group">';
+        [...performances.slice(0, 3), ...videosSnapshot.docs.slice(0, 2)].forEach(item => {
+            if (item.speed) {
+                activityHtml += `<div class="list-group-item bg-dark text-white">📊 Performance on ${new Date(item.timestamp?.toDate()).toLocaleDateString()} - Speed: ${item.speed} m/s</div>`;
+            } else if (item.data()?.analysis) {
+                activityHtml += `<div class="list-group-item bg-dark text-white">🎥 Video analysis - ${item.data().type || 'Training'}</div>`;
+            }
+        });
+        activityHtml += '</div>';
+        document.getElementById('recentActivity').innerHTML = activityHtml || '<p class="text-secondary">No activity yet</p>';
+    }
+</script>
+</body>
+</html>

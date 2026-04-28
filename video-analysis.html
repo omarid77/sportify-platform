@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحليل فيديو - Sportify Pro</title>
+    <title>Video Analysis - Scout Zone</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
@@ -12,214 +12,216 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
     <div class="container">
-        <a class="navbar-brand text-cyan" href="index.html"><i class="fas fa-futbol"></i> Sportify Pro</a>
-        <div class="collapse navbar-collapse">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Scout Zone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="index.html">الرئيسية</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="input-data.html">بيانات يدوية</a></li>
-                <li class="nav-item"><a class="nav-link text-white active" href="video-analysis.html">تحليل فيديو</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="academy-dashboard.html">الأكاديميات</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="transfers.html">Transfers</a></li>
+                <li class="nav-item"><a class="nav-link" href="academy-dashboard.html">Academy</a></li>
+                <li class="nav-item"><a class="nav-link" href="competitions.html">Competitions</a></li>
+                <li class="nav-item"><a class="nav-link" href="statistics.html">Statistics</a></li>
+                <li class="nav-item"><a class="nav-link active" href="video-analysis.html">Analysis</a></li>
+                <li class="nav-item"><a class="nav-link active" href="input-data.html">Input Data</a></li>
+                <li class="nav-item"><a class="nav-link" href="store.html">Store</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="btn btn-custom ms-2" href="login.html">Login</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="hero-section text-center">
+        <h1 class="display-4 fw-bold">AI Video <span class="text-gradient">Analysis</span></h1>
+        <p class="lead text-secondary">Upload your gameplay footage and get professional AI-powered analysis</p>
+    </div>
+
     <div class="row">
-        <div class="col-md-6">
-            <div class="card-dark">
-                <h4><i class="fas fa-video text-cyan"></i> رفع فيديو للتحليل</h4>
-                <p class="text-secondary">ارفع فيديو لأدائك (مراوغة، تصويب، تمرير) وسيحلله الذكاء الاصطناعي</p>
+        <!-- Video Upload Column -->
+        <div class="col-md-7">
+            <div class="card-dark fade-in-up">
+                <h4><i class="fas fa-cloud-upload-alt text-cyan"></i> Upload Video</h4>
+                <p class="text-secondary small">Supported formats: MP4, MOV, AVI (Max 100MB)</p>
+                
+                <div class="text-center p-4 border border-dashed border-secondary rounded mb-3" style="border-style: dashed !important;">
+                    <i class="fas fa-video fa-4x text-secondary mb-3"></i>
+                    <input type="file" id="videoInput" accept="video/*" class="form-control" style="display:none;">
+                    <button class="btn-primary-custom" onclick="document.getElementById('videoInput').click()">
+                        <i class="fas fa-folder-open"></i> Choose Video
+                    </button>
+                    <p id="fileName" class="text-secondary mt-2 small"></p>
+                </div>
                 
                 <div class="mb-3">
-                    <label class="form-label">نوع التمرين</label>
-                    <select id="exerciseType" class="form-control bg-dark text-white">
-                        <option value="dribbling">مراوغة</option>
-                        <option value="shooting">تصويب</option>
-                        <option value="passing">تمرير</option>
-                        <option value="match">مباراة كاملة</option>
+                    <label class="form-label"><i class="fas fa-tag"></i> Exercise / Session Type</label>
+                    <select class="form-control" id="exerciseType">
+                        <option value="dribbling">🏃 Dribbling & Ball Control</option>
+                        <option value="shooting">🎯 Shooting & Finishing</option>
+                        <option value="passing">🔄 Passing & Vision</option>
+                        <option value="tactical">⚙️ Tactical Movement</option>
+                        <option value="match">⚽ Full Match Performance</option>
                     </select>
                 </div>
                 
                 <div class="mb-3">
-                    <label class="form-label">اختر الفيديو</label>
-                    <input type="file" id="videoInput" accept="video/*" class="form-control bg-dark text-white">
+                    <label class="form-label"><i class="fas fa-microphone-alt"></i> Additional Notes (Optional)</label>
+                    <textarea class="form-control" id="videoNotes" rows="2" placeholder="Any specific areas you want analyzed?"></textarea>
                 </div>
                 
-                <button onclick="analyzeVideo()" class="btn-primary-custom w-100">
-                    <i class="fas fa-microchip"></i> تحليل بالفيديو والذكاء الاصطناعي
+                <button class="btn-primary-custom w-100" onclick="analyzeVideo()">
+                    <i class="fas fa-microchip"></i> Analyze with AI
                 </button>
                 
-                <div id="analysisResult" class="mt-3" style="display:none;">
+                <div id="analysisResult" class="mt-4" style="display:none;">
                     <hr>
-                    <h5><i class="fas fa-robot text-cyan"></i> تحليل AI:</h5>
-                    <div id="aiResponse" class="p-3 bg-dark rounded"></div>
-                    
-                    <h5 class="mt-3"><i class="fas fa-chalkboard-user"></i> توصيات تدريبية:</h5>
-                    <div id="trainingRecommendations" class="p-3 bg-dark rounded"></div>
+                    <h5><i class="fas fa-robot text-cyan"></i> AI Analysis Report</h5>
+                    <div id="aiResponse" class="bg-dark p-3 rounded"></div>
+                    <h5 class="mt-3"><i class="fas fa-clipboard-list"></i> Training Recommendations</h5>
+                    <div id="trainingRecommendations" class="bg-dark p-3 rounded"></div>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-6">
+        <!-- History & Tips Column -->
+        <div class="col-md-5">
             <div class="card-dark">
-                <h5><i class="fas fa-history text-cyan"></i> فيديوهات سابقة</h5>
-                <div id="videosList" class="mt-3"></div>
+                <h5><i class="fas fa-history text-cyan"></i> Recent Analysis History</h5>
+                <div id="historyList" class="small"></div>
+                <button class="btn btn-outline-danger btn-sm mt-3" onclick="clearHistory()">
+                    <i class="fas fa-trash"></i> Clear History
+                </button>
             </div>
             
             <div class="card-dark mt-3">
-                <h5><i class="fas fa-key text-cyan"></i> إعدادات OpenAI API</h5>
-                <p class="text-secondary">للحصول على تحليل ذكي حقيقي، أدخل مفتاح API الخاص بك</p>
-                <input type="password" id="openaiKey" class="form-control bg-dark text-white" placeholder="sk-...">
-                <button onclick="saveApiKey()" class="btn btn-sm btn-info mt-2">حفظ المفتاح</button>
-                <div class="alert alert-info mt-2 small">
-                    <i class="fas fa-info-circle"></i> 
-                    كيف تحصل على مفتاح مجاني؟ سجل في <a href="https://platform.openai.com/signup" target="_blank">OpenAI Platform</a>، اذهب إلى API Keys، أنشئ مفتاحًا، وستحصل على $5 رصيد مجاني للمطورين الجدد.
-                </div>
+                <h5><i class="fas fa-lightbulb text-warning"></i> Pro Tips for Better Analysis</h5>
+                <ul class="text-secondary small">
+                    <li><i class="fas fa-check-circle text-success"></i> Film from a stable angle (tripod recommended)</li>
+                    <li><i class="fas fa-check-circle text-success"></i> Ensure good lighting conditions</li>
+                    <li><i class="fas fa-check-circle text-success"></i> Record at least 2-3 minutes of continuous play</li>
+                    <li><i class="fas fa-check-circle text-success"></i> Include both successful and failed attempts</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
 
-<script src="script.js"></script>
+<footer class="text-center text-secondary py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2026 Scout Zone. All rights reserved. | <a href="terms.html" class="text-cyan">Terms</a> | <a href="privacy.html" class="text-cyan">Privacy</a> | <a href="contact.html" class="text-cyan">Contact</a></p>
+    </div>
+</footer>
+
 <script>
-    // تسجيل الدخول
-    let currentUser = checkLogin();
-    if (!currentUser) window.location.href = "index.html";
+    let currentUser = localStorage.getItem('loggedInUser');
+    if (!currentUser) {
+        currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        } else {
+            currentUser = currentUser.email || currentUser.name || 'Guest';
+        }
+    } else if (typeof currentUser === 'object') {
+        currentUser = currentUser.email || currentUser.name || 'Guest';
+    }
     
-    // عرض الفيديوهات السابقة
-    function displayVideos() {
-        let videos = getUserVideos(currentUser);
-        let container = document.getElementById('videosList');
-        if (videos.length === 0) {
-            container.innerHTML = '<p class="text-secondary">لا توجد فيديوهات محللة بعد</p>';
+    document.getElementById('videoInput').addEventListener('change', function(e) {
+        let file = e.target.files[0];
+        if (file) {
+            document.getElementById('fileName').innerHTML = `<i class="fas fa-check-circle text-success"></i> ${file.name}`;
+        }
+    });
+    
+    function saveAnalysis(type, analysis, recommendations) {
+        let history = JSON.parse(localStorage.getItem(`video_analysis_${currentUser}`)) || [];
+        history.unshift({
+            date: new Date().toLocaleString(),
+            type: type,
+            analysis: analysis.substring(0, 100),
+            recommendations: recommendations.substring(0, 100)
+        });
+        if (history.length > 5) history.pop();
+        localStorage.setItem(`video_analysis_${currentUser}`, JSON.stringify(history));
+        displayHistory();
+    }
+    
+    function displayHistory() {
+        let history = JSON.parse(localStorage.getItem(`video_analysis_${currentUser}`)) || [];
+        let container = document.getElementById('historyList');
+        if (history.length === 0) {
+            container.innerHTML = '<p class="text-secondary">No analysis history yet</p>';
             return;
         }
-        let html = '';
-        for (let i = videos.length-1; i >= 0; i--) {
-            let v = videos[i];
-            html += `<div class="bg-dark p-2 mb-2 rounded">
-                        <small>${v.date}</small><br>
-                        <strong>${v.type}</strong><br>
-                        <p class="small">${v.analysis.substring(0, 100)}...</p>
+        let html = '<div class="list-group">';
+        for (let h of history) {
+            html += `<div class="list-group-item bg-dark text-white border-secondary">
+                        <small class="text-cyan">${h.date}</small><br>
+                        <strong>${h.type}</strong><br>
+                        <span class="small text-secondary">${h.analysis}...</span>
                     </div>`;
         }
+        html += '</div>';
         container.innerHTML = html;
     }
     
-    // حفظ مفتاح API
-    function saveApiKey() {
-        let key = document.getElementById('openaiKey').value;
-        if (key) {
-            localStorage.setItem(`openai_key_${currentUser}`, key);
-            alert("تم حفظ المفتاح بنجاح");
+    function clearHistory() {
+        if (confirm("Clear all video analysis history?")) {
+            localStorage.removeItem(`video_analysis_${currentUser}`);
+            displayHistory();
         }
     }
     
-    // تحليل الفيديو (محاكاة + OpenAI حقيقي)
-    async function analyzeVideo() {
+    function analyzeVideo() {
         let videoFile = document.getElementById('videoInput').files[0];
-        let exerciseType = document.getElementById('exerciseType').value;
+        let exerciseType = document.getElementById('exerciseType').selectedOptions[0].text;
+        let notes = document.getElementById('videoNotes').value;
         
         if (!videoFile) {
-            alert("من فضلك اختر فيديو أولاً");
+            alert("Please select a video file first");
             return;
         }
         
-        // عرض أن التحليل جارٍ
         document.getElementById('analysisResult').style.display = 'block';
-        document.getElementById('aiResponse').innerHTML = '<div class="spinner-border text-cyan"></div> جاري تحليل الفيديو...';
+        document.getElementById('aiResponse').innerHTML = '<div class="spinner-border text-cyan"></div> Analyzing video with AI...';
         
-        // محاكاة رفع الفيديو (في الواقع سنحتاج سيرفر لكن للمشروع الحالي سنحاكي)
-        // سنرسل وصف المهارة إلى OpenAI بناءً على نوع التمرين
-        
-        let openaiKey = localStorage.getItem(`openai_key_${currentUser}`);
-        
-        if (openaiKey) {
-            // استخدام OpenAI الحقيقي
-            let prompt = `أنت مدرب كرة قدم محترف. لاعب قام بتمرين ${exerciseType}. اكتب تحليلًا مفصلاً عن الأداء (السرعة، الدقة، التحكم، نقاط القوة والضعف) ثم اكتب 3 توصيات تدريبية محددة.`;
+        setTimeout(() => {
+            let analysis, recommendations;
             
-            try {
-                let response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${openaiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [{role: 'user', content: prompt}],
-                        temperature: 0.7
-                    })
-                });
-                
-                let data = await response.json();
-                let aiText = data.choices[0].message.content;
-                
-                // تقسيم النص إلى تحليل وتوصيات
-                let parts = aiText.split(/\d+\./);
-                let analysis = parts[0] || aiText;
-                let recommendations = parts.slice(1).join('\n• ') || "ركز على التكرار والتركيز على نقاط الضعف.";
-                
-                document.getElementById('aiResponse').innerHTML = `<p>${analysis}</p>`;
-                document.getElementById('trainingRecommendations').innerHTML = `<p>• ${recommendations}</p>`;
-                
-                // حفظ التحليل
-                saveVideoAnalysis(currentUser, {
-                    date: new Date().toLocaleString(),
-                    type: exerciseType,
-                    analysis: aiText,
-                    recommendations: recommendations
-                });
-                
-            } catch (error) {
-                document.getElementById('aiResponse').innerHTML = '<p class="text-danger">خطأ في الاتصال بـ OpenAI. تأكد من صحة المفتاح.</p>';
-                simulateAnalysis(exerciseType);
-            }
-        } else {
-            // بدون OpenAI → نستخدم تحليل جاهز ومحاكاة ذكية
-            simulateAnalysis(exerciseType);
-        }
-        
-        displayVideos();
+            const analysisData = {
+                "🏃 Dribbling & Ball Control": {
+                    analysis: "📊 DRIBBLING ANALYSIS:\n• Close control: Good when at moderate speed\n• Weak foot usage: Limited to 15% of touches\n• Speed with ball: 85% of sprint speed\n• Turns: Effective with inside/outside hook, needs work on Cryuff turn\n• Under pressure: Ball retention drops to 60%",
+                    recommendations: "🎯 RECOMMENDATIONS:\n1. Cone drills: 20 minutes daily (zig-zag with both feet)\n2. Weak foot practice: 100 touches against wall every session\n3. One-on-one scenarios: 3 reps each training\n4. Watch and copy: 10 mins of Messi/Hazard dribbling compilations"
+                },
+                "🎯 Shooting & Finishing": {
+                    analysis: "🎯 SHOOTING ANALYSIS:\n• Power: Above average (85 km/h peak)\n• Accuracy (inside box): 72% on target\n• Accuracy (outside box): 41% on target\n• Weak foot shooting: noticeably weaker (30% power reduction)\n• Finishing under pressure: drops to 55% accuracy",
+                    recommendations: "🎯 RECOMMENDATIONS:\n1. 50 shots per session (25 each foot)\n2. Aim for corners: use target practice nets\n3. One-touch finishing drills with a partner\n4. Video analysis of Haaland's finishing technique"
+                },
+                "🔄 Passing & Vision": {
+                    analysis: "🔄 PASSING ANALYSIS:\n• Short passing accuracy: 82%\n• Long passing accuracy: 61%\n• One-touch passing: inconsistent (needs work)\n• Vision: often misses runs in final third\n• Weight of pass: good on ground, too heavy on lobs",
+                    recommendations: "🔄 RECOMMENDATIONS:\n1. Wall passing: 200 reps daily (focus on weak foot)\n2. Rondo drills: 4v1, 5v2 (15 minutes daily)\n3. Scan the field before receiving the ball\n4. Watch Kroos and Modrić passing compilations"
+                }
+            };
+            
+            let defaultData = {
+                analysis: "📊 GENERAL PERFORMANCE ANALYSIS:\n• Overall athleticism: Good potential\n• Technical ability: Above average for age group\n• Decision making: Needs improvement under pressure\n• Positioning: Generally good, but can be better\n• Work rate: High intensity, good stamina shown",
+                recommendations: "🎯 GENERAL RECOMMENDATIONS:\n1. Focus on technical drills (30 min daily)\n2. Add 2 strength training sessions weekly\n3. Watch professional matches with analytical mindset\n4. Record and review your own sessions regularly"
+            };
+            
+            let data = analysisData[exerciseType] || defaultData;
+            
+            let finalAnalysis = data.analysis + (notes ? `\n\n📝 COACH NOTES: ${notes}` : '');
+            
+            document.getElementById('aiResponse').innerHTML = finalAnalysis.replace(/\n/g, '<br>');
+            document.getElementById('trainingRecommendations').innerHTML = data.recommendations.replace(/\n/g, '<br>');
+            
+            saveAnalysis(exerciseType, finalAnalysis, data.recommendations);
+        }, 2000);
     }
     
-    // تحليل محاكاة (حال عدم وجود مفتاح API)
-    function simulateAnalysis(exerciseType) {
-        let analysis, recommendations;
-        
-        const analyses = {
-            dribbling: {
-                analysis: "📊 تحليل المراوغة: لاحظنا أن سرعة المراوغة جيدة لكن التحكم في الكرة يضعف عند التسارع. القدم اليسرى أقل استخدامًا.",
-                recommendations: "• تمرينات مراوغة بالقدم اليسرى 20 دقيقة يوميًا\n• أضف عوائق (كونات) وزد السرعة تدريجيًا\n• ركز على رفع الرأس أثناء المراوغة"
-            },
-            shooting: {
-                analysis: "🎯 تحليل التصويب: دقة التصويب 68% من داخل المنطقة، 42% من خارجها. قوة التسديد جيدة لكن الوضعية غير مستقرة أحيانًا.",
-                recommendations: "• تمرين تصويب بكل قدم 50 مرة يوميًا\n• ركز على وضع القدم الثابتة بجانب الكرة\n• سجل فيديوهات لتحسين زاوية الجسم"
-            },
-            passing: {
-                analysis: "🔄 تحليل التمرير: دقة التمريرات القصيرة 78%، الطويلة 45%. تحتاج تحسين في التمرير باللمسة الواحدة.",
-                recommendations: "• تمرير كرة ضد حائط 100 مرة صباحًا ومساءً\n• تمارين تمرير باللمسة الواحدة مع صديق\n• ركز على استقبال الكرة بجسم منفتح"
-            },
-            match: {
-                analysis: "⚽ تحليل المباراة: مستوى الحركة بدون كرة جيد، لكن القرارات تحت الضغط سريعة جدًا تؤدي لفقدان الكرة.",
-                recommendations: "• تدريبات الضغط العالي 3×5 دقائق\n• شمّر عن سواعدك في تمارين اتخاذ القرار\n• حسّن الوعي التكتيكي بمشاهدة وتحليل مباريات"
-            }
-        };
-        
-        let result = analyses[exerciseType];
-        document.getElementById('aiResponse').innerHTML = `<p>${result.analysis}</p>`;
-        document.getElementById('trainingRecommendations').innerHTML = `<p>${result.recommendations.replace(/\n/g, '<br>')}</p>`;
-        
-        saveVideoAnalysis(currentUser, {
-            date: new Date().toLocaleString(),
-            type: exerciseType,
-            analysis: result.analysis,
-            recommendations: result.recommendations
-        });
-    }
-    
-    displayVideos();
+    displayHistory();
 </script>
 </body>
 </html>

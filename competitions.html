@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitions - Scout Zone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
+    <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Scout Zone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="transfers.html">Transfers</a></li>
+                <li class="nav-item"><a class="nav-link" href="academy-dashboard.html">Academy</a></li>
+                <li class="nav-item"><a class="nav-link active" href="competitions.html">Competitions</a></li>
+                <li class="nav-item"><a class="nav-link" href="statistics.html">Statistics</a></li>
+                <li class="nav-item"><a class="nav-link" href="video-analysis.html">Analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="store.html">Store</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="btn btn-custom ms-2" href="login.html">Login</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="hero-section text-center">
+        <h1 class="display-4 fw-bold">Live <span class="text-gradient">Competitions</span></h1>
+        <p class="lead text-secondary">Track scores, standings, and live match updates from top leagues worldwide</p>
+    </div>
+
+    <!-- League Selection -->
+    <div class="card-dark mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <select class="form-control" id="leagueSelect" onchange="loadLeague()">
+                    <option value="premier">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+                    <option value="laliga">🇪🇸 La Liga</option>
+                    <option value="bundesliga">🇩🇪 Bundesliga</option>
+                    <option value="seriea">🇮🇹 Serie A</option>
+                    <option value="ligue1">🇫🇷 Ligue 1</option>
+                    <option value="champions">🏆 Champions League</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-center">
+                <span class="badge bg-success"><i class="fas fa-clock"></i> Live Updates Every 30s</span>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="text-cyan"><i class="fas fa-calendar-alt"></i> Season 2025/26</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" style="border-bottom-color: #2d3a4e;">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#standings" style="color:white;"><i class="fas fa-table"></i> Standings</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#fixtures" style="color:white;"><i class="fas fa-calendar-week"></i> Fixtures</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#results" style="color:white;"><i class="fas fa-check-circle"></i> Results</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#topScorers" style="color:white;"><i class="fas fa-trophy"></i> Top Scorers</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Standings Tab -->
+        <div class="tab-pane fade show active" id="standings">
+            <div class="card-dark">
+                <div class="table-responsive">
+                    <table class="table text-white table-hover">
+                        <thead class="text-cyan">
+                            <tr><th>#</th><th>Team</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th>Form</th></tr>
+                        </thead>
+                        <tbody id="standingsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fixtures Tab -->
+        <div class="tab-pane fade" id="fixtures">
+            <div class="card-dark" id="fixturesList"></div>
+        </div>
+        
+        <!-- Results Tab -->
+        <div class="tab-pane fade" id="results">
+            <div class="card-dark" id="resultsList"></div>
+        </div>
+        
+        <!-- Top Scorers Tab -->
+        <div class="tab-pane fade" id="topScorers">
+            <div class="card-dark" id="topScorersList"></div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-secondary py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2026 Scout Zone. All rights reserved. | <a href="terms.html" class="text-cyan">Terms</a> | <a href="privacy.html" class="text-cyan">Privacy</a> | <a href="contact.html" class="text-cyan">Contact</a></p>
+    </div>
+</footer>
+
+<script>
+    const leagueData = {
+        premier: {
+            name: "Premier League",
+            standings: [
+                { rank: 1, team: "Liverpool", mp: 30, w: 22, d: 6, l: 2, gf: 72, ga: 26, pts: 72, form: "W,W,D,W,W" },
+                { rank: 2, team: "Manchester City", mp: 30, w: 20, d: 5, l: 5, gf: 68, ga: 30, pts: 65, form: "W,L,W,D,W" },
+                { rank: 3, team: "Arsenal", mp: 30, w: 19, d: 5, l: 6, gf: 62, ga: 33, pts: 62, form: "W,W,L,W,D" },
+                { rank: 4, team: "Aston Villa", mp: 30, w: 18, d: 4, l: 8, gf: 58, ga: 40, pts: 58, form: "L,W,W,W,L" },
+                { rank: 5, team: "Tottenham", mp: 30, w: 16, d: 5, l: 9, gf: 60, ga: 45, pts: 53, form: "W,L,D,W,W" },
+                { rank: 6, team: "Manchester United", mp: 30, w: 15, d: 3, l: 12, gf: 48, ga: 44, pts: 48, form: "L,W,L,L,W" }
+            ],
+            fixtures: [
+                { home: "Liverpool", away: "Manchester United", date: "Apr 15, 2026", time: "15:00", stadium: "Anfield" },
+                { home: "Arsenal", away: "Chelsea", date: "Apr 15, 2026", time: "17:30", stadium: "Emirates" },
+                { home: "Manchester City", away: "Tottenham", date: "Apr 16, 2026", time: "20:00", stadium: "Etihad" }
+            ],
+            results: [
+                { home: "Liverpool", away: "Brighton", score: "3-1", date: "Apr 8, 2026" },
+                { home: "Arsenal", away: "Luton", score: "2-0", date: "Apr 9, 2026" }
+            ],
+            scorers: [
+                { name: "Mohamed Salah", team: "Liverpool", goals: 24, assists: 8 },
+                { name: "Erling Haaland", team: "Man City", goals: 22, assists: 5 },
+                { name: "Ollie Watkins", team: "Aston Villa", goals: 18, assists: 10 },
+                { name: "Darwin Nunez", team: "Liverpool", goals: 15, assists: 7 },
+                { name: "Bukayo Saka", team: "Arsenal", goals: 14, assists: 9 }
+            ]
+        },
+        laliga: {
+            name: "La Liga",
+            standings: [
+                { rank: 1, team: "Real Madrid", mp: 30, w: 23, d: 5, l: 2, gf: 70, ga: 24, pts: 74, form: "W,W,W,D,W" },
+                { rank: 2, team: "Barcelona", mp: 30, w: 20, d: 6, l: 4, gf: 62, ga: 28, pts: 66, form: "W,D,W,L,W" },
+                { rank: 3, team: "Girona", mp: 30, w: 18, d: 5, l: 7, gf: 56, ga: 38, pts: 59, form: "L,W,W,W,D" },
+                { rank: 4, team: "Atletico Madrid", mp: 30, w: 17, d: 6, l: 7, gf: 52, ga: 35, pts: 57, form: "W,L,D,W,W" }
+            ],
+            fixtures: [
+                { home: "Real Madrid", away: "Atletico Madrid", date: "Apr 16, 2026", time: "20:00", stadium: "Bernabeu" },
+                { home: "Barcelona", away: "Real Sociedad", date: "Apr 17, 2026", time: "21:00", stadium: "Camp Nou" }
+            ],
+            results: [
+                { home: "Real Madrid", away: "Athletic Club", score: "2-0", date: "Apr 9, 2026" },
+                { home: "Barcelona", away: "Villarreal", score: "3-2", date: "Apr 10, 2026" }
+            ],
+            scorers: [
+                { name: "Jude Bellingham", team: "Real Madrid", goals: 20, assists: 6 },
+                { name: "Robert Lewandowski", team: "Barcelona", goals: 17, assists: 5 },
+                { name: "Antoine Griezmann", team: "Atletico Madrid", goals: 14, assists: 7 }
+            ]
+        },
+        champions: {
+            name: "Champions League",
+            standings: [
+                { rank: 1, team: "Real Madrid", mp: 8, w: 6, d: 1, l: 1, gf: 18, ga: 8, pts: 19, form: "W,W,W,L,W" },
+                { rank: 2, team: "Manchester City", mp: 8, w: 6, d: 0, l: 2, gf: 22, ga: 10, pts: 18, form: "W,W,L,W,W" },
+                { rank: 3, team: "Bayern Munich", mp: 8, w: 5, d: 1, l: 2, gf: 16, ga: 9, pts: 16, form: "W,D,W,L,W" },
+                { rank: 4, team: "Arsenal", mp: 8, w: 4, d: 2, l: 2, gf: 14, ga: 8, pts: 14, form: "D,W,W,L,W" }
+            ],
+            fixtures: [
+                { home: "Real Madrid", away: "Bayern Munich", date: "Apr 30, 2026", time: "20:00", stadium: "Bernabeu" },
+                { home: "Manchester City", away: "Arsenal", date: "May 1, 2026", time: "20:00", stadium: "Etihad" }
+            ],
+            results: [
+                { home: "Real Madrid", away: "Manchester City", score: "3-3", date: "Apr 2, 2026" },
+                { home: "Bayern Munich", away: "Arsenal", score: "2-1", date: "Apr 3, 2026" }
+            ],
+            scorers: [
+                { name: "Erling Haaland", team: "Man City", goals: 12, assists: 2 },
+                { name: "Jude Bellingham", team: "Real Madrid", goals: 8, assists: 4 },
+                { name: "Harry Kane", team: "Bayern Munich", goals: 7, assists: 3 }
+            ]
+        }
+    };
+
+    function loadLeague() {
+        let league = document.getElementById('leagueSelect').value;
+        let data = leagueData[league] || leagueData.premier;
+        
+        // Standings
+        let standingsHtml = '';
+        for (let t of data.standings) {
+            let formBadges = t.form.split(',').map(f => {
+                let color = f === 'W' ? 'success' : (f === 'D' ? 'warning' : 'danger');
+                return `<span class="badge bg-${color} mx-1" style="font-size:10px;">${f}</span>`;
+            }).join('');
+            standingsHtml += `<tr>
+                <td class="fw-bold text-cyan">${t.rank}</td>
+                <td><strong>${t.team}</strong></td>
+                <td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+                <td>${t.gf}</td><td>${t.ga}</td><td class="${t.gf - t.ga > 0 ? 'text-success' : 'text-danger'}">${t.gf - t.ga}</td>
+                <td class="fw-bold text-cyan">${t.pts}</td>
+                <td>${formBadges}</td>
+            </tr>`;
+        }
+        document.getElementById('standingsTable').innerHTML = standingsHtml;
+        
+        // Fixtures
+        let fixturesHtml = '';
+        for (let f of data.fixtures) {
+            fixturesHtml += `<div class="bg-dark p-3 rounded mb-2 d-flex justify-content-between align-items-center">
+                <div><i class="fas fa-calendar text-cyan"></i> ${f.date} | ${f.time}</div>
+                <div><strong>${f.home}</strong> vs <strong>${f.away}</strong></div>
+                <div class="text-secondary small"><i class="fas fa-map-marker-alt"></i> ${f.stadium}</div>
+            </div>`;
+        }
+        document.getElementById('fixturesList').innerHTML = fixturesHtml || '<p class="text-secondary">No upcoming fixtures</p>';
+        
+        // Results
+        let resultsHtml = '';
+        for (let r of data.results) {
+            resultsHtml += `<div class="bg-dark p-3 rounded mb-2 d-flex justify-content-between align-items-center">
+                <div><i class="fas fa-check-circle text-success"></i> ${r.date}</div>
+                <div><strong>${r.home}</strong> ${r.score} <strong>${r.away}</strong></div>
+            </div>`;
+        }
+        document.getElementById('resultsList').innerHTML = resultsHtml || '<p class="text-secondary">No recent results</p>';
+        
+        // Top Scorers
+        let scorersHtml = '<div class="list-group">';
+        for (let i = 0; i < data.scorers.length; i++) {
+            let s = data.scorers[i];
+            scorersHtml += `<div class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                <div><span class="badge bg-cyan rounded-pill me-2">${i+1}</span> <strong>${s.name}</strong> <small class="text-secondary">(${s.team})</small></div>
+                <div><span class="text-cyan fw-bold">${s.goals} goals</span> <small class="text-secondary">| ${s.assists} assists</small></div>
+            </div>`;
+        }
+        scorersHtml += '</div>';
+        document.getElementById('topScorersList').innerHTML = scorersHtml;
+    }
+    
+    loadLeague();
+    
+    // Auto-refresh every 30 seconds (simulate live updates)
+    setInterval(() => {
+        loadLeague();
+        console.log("Live data refreshed");
+    }, 30000);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

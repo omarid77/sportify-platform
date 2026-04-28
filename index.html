@@ -1,178 +1,197 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة تحليل اللاعبين</title>
-    <!-- Bootstrap 5 (لجعل التصميم سريع وجميل) -->
+    <title>Scout Zone - Football Analytics Platform</title>
+    <meta name="description" content="AI-powered football analytics for amateur players and academies. Track performance, get smart recommendations, and improve your game.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome للأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            background-color: #0a0f1e;
-            font-family: 'Cairo', 'Segoe UI', sans-serif;
-        }
-        .card-stats {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: none;
-            border-radius: 20px;
-            color: white;
-            transition: transform 0.3s;
-        }
-        .card-stats:hover {
-            transform: translateY(-5px);
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #00d4ff;
-        }
-        .section-title {
-            color: white;
-            font-weight: bold;
-            margin: 30px 0 20px 0;
-            border-right: 4px solid #00d4ff;
-            padding-right: 15px;
-        }
-        .navbar-brand {
-            font-weight: bold;
-            color: #00d4ff !important;
-        }
-        .bg-dark-custom {
-            background-color: #0f172a !important;
-        }
-        .btn-custom {
-            background-color: #00d4ff;
-            color: #0a0f1e;
-            border-radius: 30px;
-            padding: 8px 25px;
-            font-weight: bold;
-        }
-        .btn-custom:hover {
-            background-color: #00b8d4;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- شريط التنقل -->
-<nav class="navbar navbar-expand-lg bg-dark-custom p-3">
+<nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
     <div class="container">
-        <a class="navbar-brand" href="#">
-            <i class="fas fa-futbol"></i> Sportify Pro
+        <a class="navbar-brand" href="index.html">
+            <i class="fas fa-futbol"></i> Scout Zone
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="#">الرئيسية</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="chat.html">دردشة</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="store.html">متجر</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="video-analysis.html">تحليل فيديو</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="academy-dashboard.html">الأكاديميات</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="input-data.html">إدخال بيانات</a></li>
-                <li class="nav-item"><a class="btn btn-custom ms-2" href="#">تسجيل دخول</a></li>
+                <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="transfers.html">Transfers</a></li>
+                <li class="nav-item"><a class="nav-link" href="academy-dashboard.html">Academy</a></li>
+                <li class="nav-item"><a class="nav-link" href="competitions.html">Competitions</a></li>
+                <li class="nav-item"><a class="nav-link" href="statistics.html">Statistics</a></li>
+                <li class="nav-item"><a class="nav-link" href="video-analysis.html">Analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="store.html">Store</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="btn btn-custom ms-2" href="login.html">Login</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
-<!-- محتوى الصفحة الرئيسية -->
+<!-- Notification Bell -->
+<div class="notification-bell" id="notificationBell" style="position: fixed; top: 20px; right: 80px; z-index: 1000; cursor: pointer;">
+    <i class="fas fa-bell fa-2x text-cyan"></i>
+    <span id="notificationCount" class="badge bg-danger" style="position: absolute; top: -5px; right: -10px; display: none;">0</span>
+</div>
+
+<!-- Notification Panel -->
+<div id="notificationPanel" style="display: none; position: fixed; top: 70px; right: 20px; width: 350px; max-height: 500px; background: #1e293b; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 1001; overflow-y: auto;">
+    <div class="p-3 border-bottom border-secondary">
+        <strong>Notifications</strong>
+        <button class="btn-close btn-close-white float-end" onclick="document.getElementById('notificationPanel').style.display='none'"></button>
+    </div>
+    <div id="notificationsList" class="p-2"></div>
+</div>
+
+<script>
+// Load notifications for current user
+async function loadNotifications() {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const snapshot = await db.collection('users').doc(user.uid).collection('notifications')
+        .orderBy('createdAt', 'desc')
+        .limit(20)
+        .get();
+    
+    const unreadCount = snapshot.docs.filter(doc => !doc.data().read).length;
+    document.getElementById('notificationCount').innerHTML = unreadCount;
+    document.getElementById('notificationCount').style.display = unreadCount > 0 ? 'inline-block' : 'none';
+    
+    let html = '';
+    snapshot.docs.forEach(doc => {
+        const n = doc.data();
+        html += `
+            <div class="notification-item p-2 border-bottom border-secondary ${!n.read ? 'bg-primary bg-opacity-25' : ''}" onclick="markAsRead('${doc.id}')">
+                <strong>${n.title}</strong>
+                <p class="small mb-0">${n.message}</p>
+                <small class="text-secondary">${new Date(n.createdAt?.toDate()).toLocaleString()}</small>
+            </div>
+        `;
+    });
+    document.getElementById('notificationsList').innerHTML = html || '<p class="text-center p-3">No notifications</p>';
+}
+
+async function markAsRead(notificationId) {
+    const user = auth.currentUser;
+    await db.collection('users').doc(user.uid).collection('notifications').doc(notificationId).update({ read: true });
+    loadNotifications();
+}
+
+// Toggle notification panel
+document.getElementById('notificationBell').addEventListener('click', () => {
+    const panel = document.getElementById('notificationPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    loadNotifications();
+});
+
+// Load notifications every 30 seconds
+setInterval(loadNotifications, 30000);
+</script>
+
 <div class="container mt-4">
-    <!-- ترحيب -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="text-white">مرحبًا بك في <span style="color:#00d4ff;">Sportify Pro</span></h1>
-            <p class="text-secondary">منصة ذكية لتحليل وتطوير اللاعبين الهواة والأكاديميات</p>
-        </div>
+    <!-- Hero Section -->
+    <div class="hero-section text-center">
+        <h1 class="display-4 fw-bold">Welcome to <span class="text-gradient">Scout Zone</span></h1>
+        <p class="lead text-secondary">The ultimate platform for player analysis, transfers, and academy management</p>
+        <a href="login.html" class="btn-primary-custom mt-3">Get Started <i class="fas fa-arrow-right"></i></a>
     </div>
 
-    <!-- كروت الإحصائيات الرئيسية (مثل الصور اللي عندك) -->
+    <!-- Stats Cards -->
     <div class="row g-4">
         <div class="col-md-3 col-sm-6">
-            <div class="card card-stats p-3">
+            <div class="card-stats p-3">
                 <i class="fas fa-running fa-2x mb-2" style="color:#00d4ff;"></i>
-                <h6>المسافة الإجمالية</h6>
-                <div class="stat-number">2.8 <small>كم</small></div>
-                <small class="text-success"><i class="fas fa-arrow-up"></i> +12% عن الأسبوع الماضي</small>
+                <h6>Total Distance</h6>
+                <div class="stat-number">2.8 <small>KM</small></div>
+                <small class="text-success"><i class="fas fa-arrow-up"></i> +12% vs last week</small>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card card-stats p-3">
+            <div class="card-stats p-3">
                 <i class="fas fa-bolt fa-2x mb-2" style="color:#ffaa00;"></i>
-                <h6>السرعة القصوى</h6>
-                <div class="stat-number">9.0 <small>م/ث</small></div>
-                <small class="text-warning">مقارنة بالمحترفين: 12.5 م/ث</small>
+                <h6>Top Speed</h6>
+                <div class="stat-number">9.0 <small>M/S</small></div>
+                <small class="text-warning">Pro benchmark: 12.5 M/S</small>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card card-stats p-3">
+            <div class="card-stats p-3">
                 <i class="fas fa-heartbeat fa-2x mb-2" style="color:#ff5500;"></i>
-                <h6>معدل اللياقة</h6>
+                <h6>Fitness Rate</h6>
                 <div class="stat-number">73<span style="font-size:1rem;">%</span></div>
-                <small class="text-danger">تحتاج تحسين اللياقة البدنية</small>
+                <small class="text-danger">Needs improvement</small>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card card-stats p-3">
+            <div class="card-stats p-3">
                 <i class="fas fa-chart-line fa-2x mb-2" style="color:#00ffaa;"></i>
-                <h6>دقة التمرير</h6>
+                <h6>Passing Accuracy</h6>
                 <div class="stat-number">67<span style="font-size:1rem;">%</span></div>
-                <small class="text-info">معدل جيد، يمكن تحسينه إلى 75%</small>
+                <small class="text-info">Target: 75%</small>
             </div>
         </div>
     </div>
 
-    <!-- توصيات ذكية (مستوحاة من فكرتك) -->
+    <!-- AI Recommendations -->
     <div class="row mt-5">
         <div class="col-12">
-            <h3 class="section-title"><i class="fas fa-robot"></i> توصيات ذكية من الذكاء الاصطناعي</h3>
+            <h3 class="section-title"><i class="fas fa-robot"></i> AI Smart Recommendations</h3>
         </div>
         <div class="col-md-6">
-            <div class="card bg-dark text-white p-3 mb-3" style="border-radius:20px;">
+            <div class="card-dark p-3">
                 <i class="fas fa-tachometer-alt fa-2x mb-2" style="color:#00d4ff;"></i>
-                <h5>تحليل السرعة</h5>
-                <p>✅ أنت تجري بسرعة جيدة (9 م/ث) لكن المحترفين يصلون إلى 12 م/ث. نصيحة: أضف تمارين العدو (Sprints) مرتين أسبوعيًا.</p>
+                <h5>Speed Analysis</h5>
+                <p>✅ You run at a good speed (9 m/s), but professionals reach 12 m/s. Tip: Add sprints twice a week.</p>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card bg-dark text-white p-3 mb-3" style="border-radius:20px;">
+            <div class="card-dark p-3">
                 <i class="fas fa-dumbbell fa-2x mb-2" style="color:#ffaa00;"></i>
-                <h5>تحليل اللياقة</h5>
-                <p>⚠️ لياقتك 73%، تلاحظ التعب بعد الدقيقة 60. نوصي بجلسات HIIT لمدة 15 دقيقة يوميًا.</p>
+                <h5>Fitness Analysis</h5>
+                <p>⚠️ Your fitness is 73%, fatigue appears after 60 min. We recommend 15-min HIIT sessions daily.</p>
             </div>
         </div>
     </div>
 
-    <!-- خطط تدريب مقترحة -->
+    <!-- Training Plan -->
     <div class="row mt-3">
         <div class="col-12">
-            <h3 class="section-title"><i class="fas fa-calendar-alt"></i> خطة تدريب هذا الأسبوع</h3>
+            <h3 class="section-title"><i class="fas fa-calendar-alt"></i> This Week's Training Plan</h3>
         </div>
         <div class="col-md-4">
-            <div class="card bg-dark text-white p-3 mb-3" style="border-radius:20px;">
-                <i class="fas fa-calendar-day"></i> <strong>الاثنين:</strong> تمارين سرعة (8×30m عدو)
+            <div class="card-dark p-3">
+                <i class="fas fa-calendar-day"></i> <strong>Monday:</strong> Speed ​​exercises (8×30m sprint)
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card bg-dark text-white p-3 mb-3" style="border-radius:20px;">
-                <i class="fas fa-calendar-day"></i> <strong>الأربعاء:</strong> تمرير ودقة تصويب
+            <div class="card-dark p-3">
+                <i class="fas fa-calendar-day"></i> <strong>Wednesday:</strong> Passing & shooting accuracy
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card bg-dark text-white p-3 mb-3" style="border-radius:20px;">
-                <i class="fas fa-calendar-day"></i> <strong>السبت:</strong> HIIT + مباراة تطبيقية
+            <div class="card-dark p-3">
+                <i class="fas fa-calendar-day"></i> <strong>Saturday:</strong> HIIT + Practice match
             </div>
         </div>
     </div>
 </div>
 
-<!-- Bootstrap JS -->
+<!-- Footer -->
+<footer class="text-center text-secondary py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2026 Scout Zone. All rights reserved. | <a href="terms.html" class="text-cyan">Terms</a> | <a href="privacy.html" class="text-cyan">Privacy</a> | <a href="contact.html" class="text-cyan">Contact</a></p>
+    </div>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>

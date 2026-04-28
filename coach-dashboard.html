@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Dashboard - Scout Zone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
+    <div class="container">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Scout Zone</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">My Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link active" href="coach-dashboard.html">Coaching</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="btn btn-custom ms-2" href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Coach Header -->
+    <div class="hero-section">
+        <h1 class="display-4 fw-bold">Coach's <span class="text-gradient">Command Center</span></h1>
+        <p class="lead text-secondary">Manage your players, assign training, and track progress</p>
+    </div>
+
+    <!-- My Players Section -->
+    <div class="card-dark">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3><i class="fas fa-users text-cyan"></i> My Players</h3>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
+                <i class="fas fa-user-plus"></i> Add Player
+            </button>
+        </div>
+        <div class="row g-4" id="playersGrid"></div>
+    </div>
+
+    <!-- Training Plans I've Created -->
+    <div class="card-dark mt-4">
+        <h3><i class="fas fa-dumbbell text-cyan"></i> My Training Plans</h3>
+        <div id="trainingPlansList" class="row g-3"></div>
+        <button class="btn-primary-custom mt-3" data-bs-toggle="modal" data-bs-target="#newPlanModal">
+            <i class="fas fa-plus"></i> Create New Training Plan
+        </button>
+    </div>
+
+    <!-- Upcoming Sessions -->
+    <div class="card-dark mt-4">
+        <h3><i class="fas fa-calendar-alt text-cyan"></i> Upcoming Sessions</h3>
+        <div id="upcomingSessions"></div>
+    </div>
+</div>
+
+<!-- Add Player Modal -->
+<div class="modal fade" id="addPlayerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-plus text-cyan"></i> Add Player to Your Team</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="email" id="playerEmail" class="form-control mb-2" placeholder="Player's Email Address">
+                <select id="playerPosition" class="form-control mb-2">
+                    <option value="Forward">Forward</option>
+                    <option value="Midfielder">Midfielder</option>
+                    <option value="Defender">Defender</option>
+                    <option value="Goalkeeper">Goalkeeper</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn-primary-custom" onclick="addPlayer()">Add Player</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Training Plan Modal -->
+<div class="modal fade" id="newPlanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-clipboard-list text-cyan"></i> New Training Plan</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="planName" class="form-control mb-2" placeholder="Plan Name (e.g., Speed Week)">
+                <textarea id="planDescription" class="form-control mb-2" rows="3" placeholder="Description..."></textarea>
+                <label class="form-label">Assign to Player:</label>
+                <select id="assignedPlayer" class="form-control mb-2"></select>
+                <label class="form-label">Due Date:</label>
+                <input type="date" id="planDueDate" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn-primary-custom" onclick="createTrainingPlan()">Create Plan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+    let currentCoach = null;
+    let myPlayers = [];
+
+    // Check authentication
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentCoach = user;
+            document.getElementById('userEmail').innerText = user.email;
+            await loadMyPlayers();
+            await loadMyPlans();
+            populatePlayerSelect();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    async function loadMyPlayers() {
+        const snapshot = await db.collection('coaches').doc(currentCoach.uid).collection('players').get();
+        myPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        let html = '';
+        for (let player of myPlayers) {
+            // Get player's latest performance
+            const perfSnapshot = await db.collection('users').doc(player.id).collection('performances').orderBy('timestamp', 'desc').limit(1).get();
+            const lastPerf = perfSnapshot.docs[0]?.data();
+            
+            html += `
+                <div class="col-md-4">
+                    <div class="card-dark">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5>${player.name || player.email}</h5>
+                                <p class="text-secondary">${player.position}</p>
+                            </div>
+                            <i class="fas fa-user-circle fa-3x text-cyan"></i>
+                        </div>
+                        ${lastPerf ? `
+                            <hr>
+                            <div class="row text-center">
+                                <div class="col-4"><small>Speed</small><br><strong>${lastPerf.speed || '-'} m/s</strong></div>
+                                <div class="col-4"><small>Accuracy</small><br><strong>${lastPerf.accuracy || '-'}%</strong></div>
+                                <div class="col-4"><small>Fitness</small><br><strong>${lastPerf.fitness || '-'}%</strong></div>
+                            </div>
+                        ` : '<p class="text-secondary mt-2">No data yet</p>'}
+                        <button class="btn-primary-custom w-100 mt-2" onclick="viewPlayerDetails('${player.id}')">
+                            <i class="fas fa-chart-line"></i> View Progress
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        document.getElementById('playersGrid').innerHTML = html || '<div class="col-12"><p class="text-center">No players yet. Add your first player!</p></div>';
+    }
+
+    async function addPlayer() {
+        const email = document.getElementById('playerEmail').value;
+        const position = document.getElementById('playerPosition').value;
+        
+        // Find user by email
+        const userQuery = await db.collection('users').where('email', '==', email).get();
+        if (userQuery.empty) {
+            alert('User not found. Make sure they have registered.');
+            return;
+        }
+        
+        const playerDoc = userQuery.docs[0];
+        await db.collection('coaches').doc(currentCoach.uid).collection('players').doc(playerDoc.id).set({
+            email: email,
+            position: position,
+            name: playerDoc.data().name || email,
+            addedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        bootstrap.Modal.getInstance(document.getElementById('addPlayerModal')).hide();
+        loadMyPlayers();
+    }
+
+    async function createTrainingPlan() {
+        const planData = {
+            name: document.getElementById('planName').value,
+            description: document.getElementById('planDescription').value,
+            assignedTo: document.getElementById('assignedPlayer').value,
+            dueDate: document.getElementById('planDueDate').value,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'active'
+        };
+        
+        await db.collection('coaches').doc(currentCoach.uid).collection('trainingPlans').add(planData);
+        
+        // Create notification for player
+        await db.collection('users').doc(planData.assignedTo).collection('notifications').add({
+            title: 'New Training Plan',
+            message: `Coach assigned you a new plan: ${planData.name}`,
+            type: 'training',
+            relatedId: planData.id,
+            read: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        bootstrap.Modal.getInstance(document.getElementById('newPlanModal')).hide();
+        loadMyPlans();
+    }
+
+    async function loadMyPlans() {
+        const snapshot = await db.collection('coaches').doc(currentCoach.uid).collection('trainingPlans').orderBy('createdAt', 'desc').get();
+        let html = '';
+        for (let doc of snapshot.docs) {
+            const plan = { id: doc.id, ...doc.data() };
+            const player = myPlayers.find(p => p.id === plan.assignedTo);
+            html += `
+                <div class="col-md-4">
+                    <div class="card-dark">
+                        <h6>${plan.name}</h6>
+                        <small class="text-secondary">For: ${player?.name || plan.assignedTo}</small>
+                        <p class="small mt-2">${plan.description?.substring(0, 80)}</p>
+                        <small class="text-cyan">Due: ${plan.dueDate || 'Not set'}</small>
+                    </div>
+                </div>
+            `;
+        }
+        document.getElementById('trainingPlansList').innerHTML = html || '<p class="text-secondary">No training plans yet</p>';
+    }
+
+    function populatePlayerSelect() {
+        let html = '<option value="">Select a player</option>';
+        myPlayers.forEach(p => {
+            html += `<option value="${p.id}">${p.name || p.email}</option>`;
+        });
+        document.getElementById('assignedPlayer').innerHTML = html;
+    }
+</script>
+</body>
+</html>

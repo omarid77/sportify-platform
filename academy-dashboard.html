@@ -1,232 +1,294 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الأكاديميات - Sportify Pro</title>
+    <title>Academy Dashboard - Scout Zone</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark-custom p-3">
     <div class="container">
-        <a class="navbar-brand text-cyan" href="index.html"><i class="fas fa-futbol"></i> Sportify Pro</a>
-        <div class="collapse navbar-collapse">
+        <a class="navbar-brand" href="index.html"><i class="fas fa-futbol"></i> Scout Zone</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="index.html">الرئيسية</a></li>
-                <li class="nav-item"><a class="nav-link text-white active" href="academy-dashboard.html">الأكاديميات</a></li>
-                <li class="nav-item"><span id="academyName" class="text-white me-2"></span></li>
+                <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="transfers.html">Transfers</a></li>
+                <li class="nav-item"><a class="nav-link active" href="academy-dashboard.html">Academy</a></li>
+                <li class="nav-item"><a class="nav-link" href="competitions.html">Competitions</a></li>
+                <li class="nav-item"><a class="nav-link" href="statistics.html">Statistics</a></li>
+                <li class="nav-item"><a class="nav-link" href="video-analysis.html">Analysis</a></li>
+                <li class="nav-item"><a class="nav-link" href="store.html">Store</a></li>
+                <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+                <li class="nav-item"><a class="btn btn-custom ms-2" href="login.html">Login</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
-    <!-- نموذج تسجيل دخول الأكاديمية -->
-    <div id="academyLogin" class="card-dark" style="display:none;">
-        <h4><i class="fas fa-school"></i> دخول الأكاديمية</h4>
-        <input type="text" id="academyEmail" class="form-control bg-dark text-white mb-2" placeholder="البريد الإلكتروني للأكاديمية">
-        <input type="password" id="academyPassword" class="form-control bg-dark text-white mb-2" placeholder="كلمة السر">
-        <button onclick="academyLogin()" class="btn-primary-custom">دخول</button>
-        <button onclick="registerAcademy()" class="btn btn-outline-info mt-2">تسجيل أكاديمية جديدة</button>
+    <!-- Hero Section -->
+    <div class="hero-section text-center">
+        <h1 class="display-4 fw-bold">Academy <span class="text-gradient">Dashboard</span></h1>
+        <p class="lead text-secondary">Manage players, track progress, and discover talents</p>
     </div>
-    
-    <!-- لوحة التحكم بعد الدخول -->
-    <div id="academyDashboard" style="display:none;">
-        <div class="row">
+
+    <!-- Academy Login / Dashboard -->
+    <div id="academyLoginSection" class="card-dark text-center" style="display:none;">
+        <i class="fas fa-school fa-4x text-cyan mb-3"></i>
+        <h3>Academy Portal</h3>
+        <p class="text-secondary">Sign in to access your academy dashboard</p>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <input type="email" id="academyEmail" class="form-control mb-2" placeholder="Academy Email">
+                <input type="password" id="academyPassword" class="form-control mb-2" placeholder="Password">
+                <button class="btn-primary-custom w-100" onclick="academyLogin()">Login</button>
+                <button class="btn-outline-custom w-100 mt-2" onclick="showRegister()">Register New Academy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academy Dashboard (shown after login) -->
+    <div id="academyDashboardSection" style="display:none;">
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="card-dark text-center">
-                    <i class="fas fa-users fa-3x text-cyan"></i>
+                <div class="card-stats p-3 text-center">
+                    <i class="fas fa-users fa-2x text-cyan"></i>
                     <h3 id="totalPlayers">0</h3>
-                    <p>إجمالي اللاعبين</p>
+                    <p class="text-secondary">Total Players</p>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card-dark text-center">
-                    <i class="fas fa-chart-line fa-3x text-cyan"></i>
-                    <h3 id="avgAccuracy">0%</h3>
-                    <p>متوسط دقة التمرير</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card-dark text-center">
-                    <i class="fas fa-tachometer-alt fa-3x text-cyan"></i>
+                <div class="card-stats p-3 text-center">
+                    <i class="fas fa-chart-line fa-2x text-cyan"></i>
                     <h3 id="avgSpeed">0</h3>
-                    <p>متوسط السرعة (م/ث)</p>
+                    <p class="text-secondary">Avg Speed (m/s)</p>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card-dark text-center">
-                    <i class="fas fa-heartbeat fa-3x text-cyan"></i>
+                <div class="card-stats p-3 text-center">
+                    <i class="fas fa-bullseye fa-2x text-cyan"></i>
+                    <h3 id="avgAccuracy">0%</h3>
+                    <p class="text-secondary">Avg Accuracy</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-stats p-3 text-center">
+                    <i class="fas fa-heartbeat fa-2x text-cyan"></i>
                     <h3 id="avgFitness">0%</h3>
-                    <p>متوسط اللياقة</p>
+                    <p class="text-secondary">Avg Fitness</p>
                 </div>
             </div>
         </div>
-        
-        <div class="row mt-3">
+
+        <!-- Performance Chart -->
+        <div class="row g-4 mb-4">
             <div class="col-md-8">
                 <div class="card-dark">
-                    <h5><i class="fas fa-chart-simple"></i> تطور اللاعبين (متوسط دقة التمرير)</h5>
-                    <canvas id="playersChart" height="200"></canvas>
+                    <h5><i class="fas fa-chart-line text-cyan"></i> Team Performance Trends</h5>
+                    <canvas id="teamChart" height="200"></canvas>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card-dark">
-                    <h5><i class="fas fa-medal"></i> أفضل اللاعبين</h5>
-                    <div id="topPlayers"></div>
+                    <h5><i class="fas fa-trophy text-warning"></i> Top Performers</h5>
+                    <div id="topPlayersList"></div>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Players List -->
         <div class="card-dark">
-            <h5><i class="fas fa-list"></i> قائمة اللاعبين المسجلين</h5>
-            <input type="text" id="searchPlayer" class="form-control bg-dark text-white mb-2" placeholder="بحث باسم اللاعب...">
-            <div id="playersList" class="table-responsive">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5><i class="fas fa-list text-cyan"></i> Academy Players</h5>
+                <button class="btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
+                    <i class="fas fa-user-plus"></i> Add Player
+                </button>
+            </div>
+            <input type="text" id="searchPlayer" class="form-control mb-3" placeholder="Search players...">
+            <div class="table-responsive">
                 <table class="table text-white">
-                    <thead>
-                        <tr><th>اللاعب</th><th>آخر دقة تمرير</th><th>آخر سرعة</th><th>آخر لياقة</th><th>أداء</th></tr>
+                    <thead class="text-cyan">
+                        <tr><th>Player</th><th>Age</th><th>Position</th><th>Speed</th><th>Accuracy</th><th>Fitness</th><th>Status</th><th></th></tr>
                     </thead>
-                    <tbody id="playersTableBody"></tbody>
+                    <tbody id="playersTable"></tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-<script src="script.js"></script>
+<!-- Add Player Modal -->
+<div class="modal fade" id="addPlayerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-plus text-cyan"></i> Add New Player</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="playerName" class="form-control mb-2" placeholder="Full Name">
+                <input type="number" id="playerAge" class="form-control mb-2" placeholder="Age">
+                <select id="playerPosition" class="form-control mb-2">
+                    <option value="Forward">Forward</option>
+                    <option value="Midfielder">Midfielder</option>
+                    <option value="Defender">Defender</option>
+                    <option value="Goalkeeper">Goalkeeper</option>
+                </select>
+                <input type="number" step="0.1" id="playerSpeed" class="form-control mb-2" placeholder="Top Speed (m/s)">
+                <input type="number" id="playerAccuracy" class="form-control mb-2" placeholder="Passing Accuracy (%)">
+                <input type="number" id="playerFitness" class="form-control mb-2" placeholder="Fitness Level (%)">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn-primary-custom" onclick="addPlayer()">Add Player</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center text-secondary py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2026 Scout Zone. All rights reserved. | <a href="terms.html" class="text-cyan">Terms</a> | <a href="privacy.html" class="text-cyan">Privacy</a> | <a href="contact.html" class="text-cyan">Contact</a></p>
+    </div>
+</footer>
+
 <script>
-    // بيانات الأكاديميات (localStorage)
-    let currentAcademy = localStorage.getItem("loggedAcademy");
+    let currentAcademy = localStorage.getItem('currentAcademy');
+    let academyData = JSON.parse(localStorage.getItem('academy_data')) || {};
     
     if (!currentAcademy) {
-        document.getElementById('academyLogin').style.display = 'block';
+        document.getElementById('academyLoginSection').style.display = 'block';
     } else {
-        document.getElementById('academyDashboard').style.display = 'block';
-        document.getElementById('academyName').innerHTML = `🏫 ${currentAcademy}`;
+        document.getElementById('academyDashboardSection').style.display = 'block';
         loadAcademyData();
     }
     
-    // تسجيل أكاديمية جديدة
-    function registerAcademy() {
-        let email = document.getElementById('academyEmail').value;
-        let password = document.getElementById('academyPassword').value;
-        if (email && password) {
-            let academies = JSON.parse(localStorage.getItem("academies")) || {};
-            if (!academies[email]) {
-                academies[email] = { password: password, players: [] };
-                localStorage.setItem("academies", JSON.stringify(academies));
-                alert("تم تسجيل الأكاديمية بنجاح! يمكنك الآن الدخول.");
-            } else {
-                alert("هذه الأكاديمية مسجلة بالفعل");
-            }
-        } else {
-            alert("يرجى إدخال البريد وكلمة السر");
+    function showRegister() {
+        let email = prompt("Enter academy email:");
+        let password = prompt("Create a password:");
+        let name = prompt("Academy name:");
+        if (email && password && name) {
+            academyData[email] = { password: password, name: name, players: [] };
+            localStorage.setItem('academy_data', JSON.stringify(academyData));
+            alert("Academy registered! You can now login.");
         }
     }
     
     function academyLogin() {
         let email = document.getElementById('academyEmail').value;
         let password = document.getElementById('academyPassword').value;
-        let academies = JSON.parse(localStorage.getItem("academies")) || {};
-        
-        if (academies[email] && academies[email].password === password) {
-            localStorage.setItem("loggedAcademy", email);
-            location.reload();
+        if (academyData[email] && academyData[email].password === password) {
+            localStorage.setItem('currentAcademy', email);
+            currentAcademy = email;
+            document.getElementById('academyLoginSection').style.display = 'none';
+            document.getElementById('academyDashboardSection').style.display = 'block';
+            loadAcademyData();
         } else {
-            alert("بيانات دخول غير صحيحة");
+            alert("Invalid credentials");
         }
     }
     
-    // إضافة لاعب للأكاديمية
-    function addPlayerToAcademy(playerEmail, playerData) {
-        let academies = JSON.parse(localStorage.getItem("academies")) || {};
-        let academyData = academies[currentAcademy];
-        if (academyData) {
-            let existing = academyData.players.find(p => p.email === playerEmail);
-            if (!existing) {
-                academyData.players.push({ email: playerEmail, data: playerData });
-                localStorage.setItem("academies", JSON.stringify(academies));
-            }
-        }
-    }
-    
-    // تحميل وعرض بيانات الأكاديمية
     function loadAcademyData() {
-        let academies = JSON.parse(localStorage.getItem("academies")) || {};
-        let academyData = academies[currentAcademy];
+        let data = academyData[currentAcademy];
+        if (!data) return;
         
-        if (!academyData || academyData.players.length === 0) {
-            document.getElementById('playersTableBody').innerHTML = '<tr><td colspan="5" class="text-center">لا يوجد لاعبون مسجلون بعد</td></tr>';
-            document.getElementById('totalPlayers').innerText = "0";
-            return;
-        }
+        let players = data.players || [];
+        document.getElementById('totalPlayers').innerHTML = players.length;
         
-        let players = academyData.players;
-        document.getElementById('totalPlayers').innerText = players.length;
-        
-        // حساب المتوسطات
-        let totalAccuracy = 0, totalSpeed = 0, totalFitness = 0, count = 0;
-        let playerStats = [];
-        
+        // Calculate averages
+        let totalSpeed = 0, totalAccuracy = 0, totalFitness = 0;
         for (let p of players) {
-            let lastData = p.data[p.data.length-1] || { accuracy: 0, speed: 0, fitness: 0 };
-            totalAccuracy += lastData.accuracy || 0;
-            totalSpeed += lastData.speed || 0;
-            totalFitness += lastData.fitness || 0;
-            count++;
-            playerStats.push({ email: p.email, ...lastData });
+            totalSpeed += p.speed || 0;
+            totalAccuracy += p.accuracy || 0;
+            totalFitness += p.fitness || 0;
         }
+        document.getElementById('avgSpeed').innerHTML = players.length ? (totalSpeed/players.length).toFixed(1) : '0';
+        document.getElementById('avgAccuracy').innerHTML = players.length ? Math.round(totalAccuracy/players.length) + '%' : '0%';
+        document.getElementById('avgFitness').innerHTML = players.length ? Math.round(totalFitness/players.length) + '%' : '0%';
         
-        document.getElementById('avgAccuracy').innerText = Math.round(totalAccuracy/count) + "%";
-        document.getElementById('avgSpeed').innerText = (totalSpeed/count).toFixed(1);
-        document.getElementById('avgFitness').innerText = Math.round(totalFitness/count) + "%";
-        
-        // عرض الجدول
-        let html = '';
-        for (let p of playerStats) {
-            let performance = (p.accuracy > 70 && p.speed > 8) ? "متميز" : (p.accuracy > 50 ? "جيد" : "يحتاج تحسين");
-            html += `<tr>
-                        <td>${p.email}</td>
-                        <td>${p.accuracy || 0}%</td>
-                        <td>${p.speed || 0} م/ث</td>
-                        <td>${p.fitness || 0}%</td>
-                        <td><span class="badge ${performance === 'متميز' ? 'bg-success' : (performance === 'جيد' ? 'bg-warning' : 'bg-danger')}">${performance}</span></td>
-                     </tr>`;
+        // Players table
+        let tableHtml = '';
+        for (let p of players) {
+            let status = (p.accuracy > 75 && p.speed > 8.5) ? '<span class="badge bg-success">⭐ Star</span>' : 
+                        (p.accuracy > 60 ? '<span class="badge bg-warning">🟡 Developing</span>' : '<span class="badge bg-danger">🔴 Needs Work</span>');
+            tableHtml += `<tr>
+                <td><strong>${p.name}</strong></td>
+                <td>${p.age || '?'}</td>
+                <td>${p.position}</td>
+                <td class="text-cyan">${p.speed || 0}</td>
+                <td class="text-cyan">${p.accuracy || 0}%</td>
+                <td class="text-cyan">${p.fitness || 0}%</td>
+                <td>${status}</td>
+                <td><button class="btn btn-sm btn-outline-danger" onclick="removePlayer('${p.name}')"><i class="fas fa-trash"></i></button></td>
+            </tr>`;
         }
-        document.getElementById('playersTableBody').innerHTML = html;
+        document.getElementById('playersTable').innerHTML = tableHtml || '<tr><td colspan="8" class="text-center">No players yet</td></tr>';
         
-        // أفضل 3 لاعبين
-        let sorted = [...playerStats].sort((a,b) => (b.accuracy||0) - (a.accuracy||0)).slice(0,3);
+        // Top performers
+        let sorted = [...players].sort((a,b) => (b.accuracy || 0) - (a.accuracy || 0)).slice(0,3);
         let topHtml = '';
-        sorted.forEach((p, idx) => {
-            topHtml += `<div class="mb-2">${idx+1}. ${p.email} - دقة ${p.accuracy}%</div>`;
-        });
-        document.getElementById('topPlayers').innerHTML = topHtml || "لا توجد بيانات";
+        for (let i = 0; i < sorted.length; i++) {
+            topHtml += `<div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-dark rounded">
+                <div><span class="badge bg-cyan me-2">${i+1}</span> <strong>${sorted[i].name}</strong></div>
+                <div class="text-cyan">${sorted[i].accuracy || 0}%</div>
+            </div>`;
+        }
+        document.getElementById('topPlayersList').innerHTML = topHtml || '<p class="text-secondary">No data yet</p>';
         
-        // رسم بياني (محاكاة)
-        let ctx = document.getElementById('playersChart').getContext('2d');
-        if (window.academyChart) window.academyChart.destroy();
-        window.academyChart = new Chart(ctx, {
+        // Chart
+        let chartData = players.slice(0,5).map(p => p.accuracy || 0);
+        let ctx = document.getElementById('teamChart').getContext('2d');
+        if (window.teamChart) window.teamChart.destroy();
+        window.teamChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: playerStats.slice(0,5).map(p => p.email.split('@')[0]),
-                datasets: [{ label: 'دقة التمرير %', data: playerStats.slice(0,5).map(p => p.accuracy || 0), backgroundColor: '#00d4ff' }]
+                labels: players.slice(0,5).map(p => p.name?.split(' ')[0] || 'Player'),
+                datasets: [{ label: 'Passing Accuracy %', data: chartData, backgroundColor: '#00d4ff', borderRadius: 10 }]
             },
             options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } } }
         });
     }
     
-    // وظيفة لتسجيل لاعب جديد (من صفحة إدخال البيانات)
-    window.registerPlayerWithAcademy = function(playerEmail, performanceData) {
-        let academies = JSON.parse(localStorage.getItem("academies")) || {};
-        for (let academyEmail in academies) {
-            // إذا شاءت الأكاديمية إضافة لاعب - هذه ميزة متقدمة، للإطار الحالي نتركها يدوية
+    function addPlayer() {
+        let newPlayer = {
+            name: document.getElementById('playerName').value,
+            age: document.getElementById('playerAge').value,
+            position: document.getElementById('playerPosition').value,
+            speed: parseFloat(document.getElementById('playerSpeed').value),
+            accuracy: parseFloat(document.getElementById('playerAccuracy').value),
+            fitness: parseFloat(document.getElementById('playerFitness').value),
+            joined: new Date().toLocaleDateString()
+        };
+        
+        if (!newPlayer.name) { alert("Enter player name"); return; }
+        
+        let data = academyData[currentAcademy];
+        data.players.push(newPlayer);
+        localStorage.setItem('academy_data', JSON.stringify(academyData));
+        
+        bootstrap.Modal.getInstance(document.getElementById('addPlayerModal')).hide();
+        document.getElementById('addPlayerModal').querySelectorAll('input').forEach(i => i.value = '');
+        loadAcademyData();
+    }
+    
+    function removePlayer(name) {
+        if (confirm(`Remove ${name} from academy?`)) {
+            let data = academyData[currentAcademy];
+            data.players = data.players.filter(p => p.name !== name);
+            localStorage.setItem('academy_data', JSON.stringify(academyData));
+            loadAcademyData();
         }
-    };
+    }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
